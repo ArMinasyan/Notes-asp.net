@@ -1,0 +1,25 @@
+{
+  "Files": [
+    {
+      "Id": "/home/armen/RiderProjects/Notes/Notes/obj/Debug/net8.0/scopedcss/projectbundle/Notes.bundle.scp.css",
+      "PackagePath": "staticwebassets/Notes.bundle.scp.css"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.Notes.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.Notes.props",
+      "PackagePath": "build\\Notes.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.Notes.props",
+      "PackagePath": "buildMultiTargeting\\Notes.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.Notes.props",
+      "PackagePath": "buildTransitive\\Notes.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
