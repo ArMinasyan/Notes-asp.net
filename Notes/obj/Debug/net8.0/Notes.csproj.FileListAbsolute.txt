@@ -162,3 +162,4 @@
 /home/armen/RiderProjects/Notes/Notes/bin/Debug/net8.0/zh-Hant/Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
 /home/armen/RiderProjects/Notes/Notes/bin/Debug/net8.0/EntityFramework.dll
 /home/armen/RiderProjects/Notes/Notes/bin/Debug/net8.0/System.Data.Entity.Repository.dll
+/home/armen/RiderProjects/Notes/Notes/obj/Debug/net8.0/Notes.sourcelink.json
