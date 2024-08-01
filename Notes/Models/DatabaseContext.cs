@@ -15,7 +15,6 @@ public class DatabaseContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<UserModel>().HasKey(u => u.Id);
-        modelBuilder.Entity<UserModel>().ToTable("users");
+        modelBuilder.Entity<UserModel>().HasKey(u => u.Id).HasName("PK_id");
     }
 }

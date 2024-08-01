@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore;
 using Microsoft.EntityFrameworkCore;
-using Notes.Migrations;
 using Notes.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,7 +29,7 @@ app.UseHttpsRedirection();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-    dbContext.Database.Migrate();
+    dbContext.Database.EnsureCreated();
 }
 
 
