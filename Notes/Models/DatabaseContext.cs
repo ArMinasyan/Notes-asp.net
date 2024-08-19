@@ -5,11 +5,11 @@ namespace Notes.Models;
 
 public class DatabaseContext : DbContext
 {
-   public DbSet<UserModel> Users { get; set; }
-   
+    public DbSet<UserModel> Users { get; set; }
+    public DbSet<NoteModel> Notes { get; set; }
+
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
-        
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -17,5 +17,10 @@ public class DatabaseContext : DbContext
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<UserModel>().HasKey(u => u.Id).HasName("PK_id");
+        modelBuilder.Entity<NoteModel>().HasKey(n => n.Id).HasName("PK_id");
+        modelBuilder.Entity<UserModel>()
+            .HasMany(u => u.Notes)
+            .WithOne(u => u.User)
+            .HasForeignKey(u => u.UserId);
     }
 }

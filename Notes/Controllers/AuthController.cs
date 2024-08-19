@@ -1,8 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices.JavaScript;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
@@ -23,28 +26,36 @@ public class AuthController : Controller
 
     private string CreateJwt(int userId)
     {
-        List<Claim> claims = new List<Claim> { };
+        List<Claim> claims = new List<Claim>
+        {
+            new Claim("id",userId.ToString())
+        };
 
-        claims.Add(new Claim(ClaimTypes.NameIdentifier, userId.ToString()));
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("12345678123456781234567812345678"));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
+        var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
         var token = new JwtSecurityToken(
             claims: claims,
             expires: DateTime.Now.AddHours(2),
-            signingCredentials: creds
+            signingCredentials: signingCredentials
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
+    
     [HttpPost]
     public ActionResult SignIn([FromForm] UserDto payload)
     {
-        var user = this._dbContext.Users.SingleOrDefault(u => u.Username == payload.Username);
-        if (user is null ||
-            user.Password != payload.Password) return Unauthorized("Invalid usernam or password");
+        var user = this._dbContext.Users.Single(u => u.Username == payload.Username);
+        
+        Console.Write(user);
+        if(user is null)  return Unauthorized("Invalid username or password");
+        Console.Write(BCrypt.Net.BCrypt.HashPassword(payload.Password, 12));
+        bool isPasswordMatch = BCrypt.Net.BCrypt.Verify(payload.Password, user.Password);
+        if (!isPasswordMatch) return Unauthorized("Invalid username or password");
 
-        return Ok(new { jwt = this.CreateJwt(user.Id) });
+        string jwtToken = this.CreateJwt(user.Id);
+        
+        return Ok(new { jwtToken, username = user.Username });
     }
 }

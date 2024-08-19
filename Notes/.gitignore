@@ -28,3 +28,7 @@
 [Oo]bj/
 _UpgradeReport_Files/
 [Pp]ackages/
+notes.db
+../notes.db
+../notes.db-shm
+../notes.db-wal
