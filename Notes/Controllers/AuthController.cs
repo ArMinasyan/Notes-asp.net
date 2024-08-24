@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.IdentityModel.Tokens;
 using Notes.DTO;
 using Notes.Models;
@@ -18,26 +19,31 @@ namespace Notes.Controllers;
 public class AuthController : Controller
 {
     private readonly DatabaseContext _dbContext;
-
-    public AuthController(DatabaseContext context)
+    private readonly IConfiguration _configuration;
+    
+    public AuthController(DatabaseContext context, IConfiguration config)
     {
         _dbContext = context;
+        _configuration = config;
     }
 
     private string CreateJwt(int userId)
     {
+        var JwtSettings = this._configuration.GetSection("JwtSettings");
+
         List<Claim> claims = new List<Claim>
         {
-            new Claim("id",userId.ToString())
+            new Claim("id", userId.ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("12345678123456781234567812345678"));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSettings["Secret"]!));
         var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
         var token = new JwtSecurityToken(
             claims: claims,
             expires: DateTime.Now.AddHours(2),
-            signingCredentials: signingCredentials
+            signingCredentials: signingCredentials,
+            audience:JwtSettings["ValidIssuer"]
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -46,13 +52,10 @@ public class AuthController : Controller
     [HttpPost]
     public ActionResult SignIn([FromForm] UserDto payload)
     {
-        var user = this._dbContext.Users.Single(u => u.Username == payload.Username);
-        
-        Console.Write(user);
-        if(user is null)  return Unauthorized("Invalid username or password");
-        Console.Write(BCrypt.Net.BCrypt.HashPassword(payload.Password, 12));
+        var user = this._dbContext.Users.SingleOrDefault(u => u.Username == payload.Username);
+        if(user is null)  return Unauthorized("Invalid username and/or password");
         bool isPasswordMatch = BCrypt.Net.BCrypt.Verify(payload.Password, user.Password);
-        if (!isPasswordMatch) return Unauthorized("Invalid username or password");
+        if (!isPasswordMatch) return Unauthorized("Invalid username and/or password");
 
         string jwtToken = this.CreateJwt(user.Id);
         

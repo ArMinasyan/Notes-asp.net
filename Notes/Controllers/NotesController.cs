@@ -10,7 +10,7 @@ using Notes.Models;
 
 namespace Notes.Controllers;
 
-[Authorize]
+// [Authorize]
 [Route("/notes")]
 public class NotesController: Controller
 {

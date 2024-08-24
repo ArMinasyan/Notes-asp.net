@@ -17,5 +17,5 @@ public class NoteModel
     [Column("user_id")]
     public int UserId { get; set; }
 
-    public virtual UserModel User { get; set; }
+    public UserModel User { get; set; } = null!;
 }

@@ -21,6 +21,7 @@ public class DatabaseContext : DbContext
         modelBuilder.Entity<UserModel>()
             .HasMany(u => u.Notes)
             .WithOne(u => u.User)
-            .HasForeignKey(u => u.UserId);
+            .HasForeignKey(u => u.UserId)
+            .IsRequired();
     }
 }

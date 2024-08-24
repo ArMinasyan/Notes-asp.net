@@ -13,20 +13,25 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Add services to the container.
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("12345678123456781234567812345678"))
-        };
-    });
+// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>
+//     {
+//         options.TokenValidationParameters = new TokenValidationParameters
+//         {
+//             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("12345678123456781234567812345678"))
+//         };
+//     });
+
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<DatabaseContext>(ops =>
 {
     ops.UseSqlite(builder.Configuration.GetConnectionString("DevDB"));
 });
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
@@ -37,6 +42,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    
     app.UseSwagger();
     app.UseSwaggerUI();
 }
