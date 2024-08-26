@@ -43,14 +43,14 @@ public class AuthController : Controller
             claims: claims,
             expires: DateTime.Now.AddHours(2),
             signingCredentials: signingCredentials,
-            audience:JwtSettings["ValidIssuer"]
+            issuer: JwtSettings["ValidIssuer"]
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
     [HttpPost]
-    public ActionResult SignIn([FromForm] UserDto payload)
+    public ActionResult SignIn([FromBody] UserDto payload)
     {
         var user = this._dbContext.Users.SingleOrDefault(u => u.Username == payload.Username);
         if(user is null)  return Unauthorized("Invalid username and/or password");
@@ -59,6 +59,6 @@ public class AuthController : Controller
 
         string jwtToken = this.CreateJwt(user.Id);
         
-        return Ok(new { jwtToken, username = user.Username });
+        return Ok(new { jwtToken, username = user.Username, id = user.Id });
     }
 }

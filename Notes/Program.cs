@@ -7,38 +7,73 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.OpenApi.Models;
+using System.Security.AccessControl;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Notes;
 using Notes.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var services = builder.Services;
 
 // Add services to the container.
-// builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//     .AddJwtBearer(options =>
-//     {
-//         options.TokenValidationParameters = new TokenValidationParameters
-//         {
-//             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("12345678123456781234567812345678"))
-//         };
-//     });
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("12345678123456781234567812345678")),
+            ValidIssuer = builder.Configuration["JwtSettings:ValidIssuer"],
+            ValidateIssuerSigningKey = true,
+            ValidateIssuer = true,
+            ValidateAudience = false
+        };
+    });
 
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
+services.AddControllers().AddNewtonsoftJson(options =>
     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
 );
 
-builder.Services.AddControllersWithViews();
-builder.Services.AddDbContext<DatabaseContext>(ops =>
+services.AddHttpContextAccessor();
+services.AddControllersWithViews();
+services.AddDbContext<DatabaseContext>(ops =>
 {
     ops.UseSqlite(builder.Configuration.GetConnectionString("DevDB"));
 });
-builder.Services.AddSwaggerGen();
+services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer"
+    });
+    
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddControllers();
+services.AddEndpointsApiExplorer();
+services.AddControllers();
 
 var app = builder.Build();
 
-
+app.UseAuthentication();
+app.UseAuthorization();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

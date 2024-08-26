@@ -10,12 +10,12 @@ using Notes.Models;
 
 namespace Notes.Controllers;
 
-// [Authorize]
 [Route("/notes")]
+[Authorize]
 public class NotesController: Controller
 {
     private readonly DatabaseContext _dbContext;
-
+    
     public NotesController(DatabaseContext context)
     {
         _dbContext = context;
