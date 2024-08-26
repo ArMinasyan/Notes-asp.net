@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ namespace Notes.Controllers;
 public class NotesController: Controller
 {
     private readonly DatabaseContext _dbContext;
+    private readonly GetUser user = new GetUser();
     
     public NotesController(DatabaseContext context)
     {
@@ -41,7 +43,8 @@ public class NotesController: Controller
     [HttpPost]
     public IActionResult CreateNote([FromBody] NoteDto payload)
     {
-        var note = new NoteModel { Title = payload.Title, Description = payload.Description, UserId = 1 };
+        Paylod user = this.user.Get();
+        var note = new NoteModel { Title = payload.Title, Description = payload.Description, UserId = user.id };
         this._dbContext.Notes.Add(note);
         this._dbContext.SaveChanges();
         return StatusCode((int) HttpStatusCode.Created, note);
