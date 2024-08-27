@@ -1,11 +1,7 @@
-﻿using System.Linq;
-using System.Net;
-using System.Security.Claims;
+﻿using System.Net;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Notes.DTO;
 using Notes.Models;
 
@@ -13,11 +9,11 @@ namespace Notes.Controllers;
 
 [Route("/notes")]
 [Authorize]
-public class NotesController: Controller
+public class NotesController : Controller
 {
     private readonly DatabaseContext _dbContext;
-    private readonly GetUser user = new GetUser();
-    
+    private readonly AuthUser _user = new AuthUser();
+
     public NotesController(DatabaseContext context)
     {
         _dbContext = context;
@@ -26,28 +22,56 @@ public class NotesController: Controller
     [HttpGet]
     public ActionResult GetAllNotes()
     {
-        var notes = this._dbContext.Notes.Include(n => n.User).ToList();
+        var user = this._user.GetUser();
+        var notes = this._dbContext.Notes
+            .Where(note => note.UserId == user.Id)
+            .Select(note => new { id = note.Id, title = note.Title, description = note.Description })
+            .ToList();
         return Ok(notes);
     }
 
-    [HttpGet("get-notes-by-user")]
-    public ActionResult GetAllNotesByUser()
-    {
-        var notes = this._dbContext.Users
-            .Where(user => user.Id == 1)
-            .Include(user => user.Notes)
-            .FirstOrDefault();
-        return Ok(notes);
-    }
-    
     [HttpPost]
     public IActionResult CreateNote([FromBody] NoteDto payload)
     {
-        Paylod user = this.user.Get();
-        var note = new NoteModel { Title = payload.Title, Description = payload.Description, UserId = user.id };
+        Paylod user = this._user.GetUser();
+        var note = new NoteModel { Title = payload.Title, Description = payload.Description, UserId = user.Id };
         this._dbContext.Notes.Add(note);
         this._dbContext.SaveChanges();
-        return StatusCode((int) HttpStatusCode.Created, note);
+        return StatusCode((int)HttpStatusCode.Created, note);
     }
 
+    [HttpPut(":id")]
+    public IActionResult UpdateNote(int id, [FromBody] NoteDto payload)
+    {
+        Paylod user = this._user.GetUser();
+        var note = this._dbContext.Notes.FirstOrDefault(note => note.Id == id && note.UserId == user.Id);
+
+        if (note is null)
+        {
+            return StatusCode((int)HttpStatusCode.NotFound, new { message = "Note not found." });
+        }
+
+        note.Title = payload.Title ?? note.Title;
+        note.Description = payload.Description ?? note.Description;
+
+        this._dbContext.SaveChanges();
+        return StatusCode((int)HttpStatusCode.OK, new { id });
+    }
+
+    [HttpDelete(":id")]
+    public IActionResult DeleteNote(int id)
+    {
+        Paylod user = this._user.GetUser();
+        var deletedNote = this._dbContext.Notes
+            .Where(note => note.Id == id)
+            .Where(note => note.UserId == user.Id)
+            .ExecuteDelete();
+
+        if (deletedNote == 0)
+        {
+            return StatusCode((int)HttpStatusCode.NotFound, new { message = "Note not found." });
+        }
+
+        return StatusCode((int)HttpStatusCode.OK, new { id });
+    }
 }

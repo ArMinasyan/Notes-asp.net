@@ -1,17 +1,8 @@
-using System.Linq;
 using System.Text;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.OpenApi.Models;
-using System.Security.AccessControl;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Notes;
 using Notes.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +14,7 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("12345678123456781234567812345678")),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!)),
             ValidIssuer = builder.Configuration["JwtSettings:ValidIssuer"],
             ValidateIssuerSigningKey = true,
             ValidateIssuer = true,
@@ -72,7 +63,6 @@ services.AddControllers();
 
 var app = builder.Build();
 
-app.UseAuthentication();
 app.UseAuthorization();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

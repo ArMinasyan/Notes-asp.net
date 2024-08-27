@@ -1,14 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Logging.Console;
 using Microsoft.IdentityModel.Tokens;
 using Notes.DTO;
 using Notes.Models;

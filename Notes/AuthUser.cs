@@ -2,20 +2,16 @@ using Notes.DTO;
 
 namespace Notes;
 
-public class GetUser
+public class AuthUser
 {
     private readonly IHttpContextAccessor? _httpContextAccessor = new HttpContextAccessor();
 
-    public GetUser()
-    {
-    }
 
-
-    public Paylod Get()
+    public Paylod GetUser()
     {
         return new Paylod
         {
-            id = Convert.ToInt16(this._httpContextAccessor.HttpContext.User.Claims.FirstOrDefault().Value)
+            Id = Convert.ToInt16(this._httpContextAccessor?.HttpContext?.User.Claims.FirstOrDefault()?.Value)
         };
     }
 }
