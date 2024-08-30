@@ -8,6 +8,7 @@ using Notes.Models;
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 
+services.AddRouting( options => options.LowercaseUrls = true );
 // Add services to the container.
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -39,7 +40,7 @@ services.AddSwaggerGen(options =>
         Name = "Authorization",
         In = ParameterLocation.Header,
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer"
+        Scheme = "Bearer",
     });
     
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -59,7 +60,6 @@ services.AddSwaggerGen(options =>
 });
 
 services.AddEndpointsApiExplorer();
-services.AddControllers();
 
 var app = builder.Build();
 

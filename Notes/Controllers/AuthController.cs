@@ -8,21 +8,11 @@ using Notes.Models;
 
 namespace Notes.Controllers;
 
-[Route("/auth")]
-public class AuthController : Controller
+public class AuthController(DatabaseContext dbContext, IConfiguration configuration) : BaseApiController
 {
-    private readonly DatabaseContext _dbContext;
-    private readonly IConfiguration _configuration;
-    
-    public AuthController(DatabaseContext context, IConfiguration config)
-    {
-        _dbContext = context;
-        _configuration = config;
-    }
-
     private string CreateJwt(int userId)
     {
-        var JwtSettings = this._configuration.GetSection("JwtSettings");
+        var JwtSettings = configuration.GetSection("JwtSettings");
 
         List<Claim> claims = new List<Claim>
         {
@@ -33,7 +23,7 @@ public class AuthController : Controller
         var signingCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
         var token = new JwtSecurityToken(
-            claims: claims,
+            claims: claims ,
             expires: DateTime.Now.AddHours(2),
             signingCredentials: signingCredentials,
             issuer: JwtSettings["ValidIssuer"]
@@ -45,7 +35,7 @@ public class AuthController : Controller
     [HttpPost]
     public ActionResult SignIn([FromBody] UserDto payload)
     {
-        var user = this._dbContext.Users.SingleOrDefault(u => u.Username == payload.Username);
+        var user = dbContext.Users.SingleOrDefault(u => u.Username == payload.Username);
         if(user is null)  return Unauthorized("Invalid username and/or password");
         bool isPasswordMatch = BCrypt.Net.BCrypt.Verify(payload.Password, user.Password);
         if (!isPasswordMatch) return Unauthorized("Invalid username and/or password");

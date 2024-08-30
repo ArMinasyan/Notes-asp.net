@@ -6,6 +6,9 @@ public class AuthUser
 {
     private readonly IHttpContextAccessor? _httpContextAccessor = new HttpContextAccessor();
 
+    public AuthUser()
+    {
+    }
 
     public Paylod GetUser()
     {
