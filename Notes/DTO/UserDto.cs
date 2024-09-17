@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Notes.DTO;
 
 public class UserDto
